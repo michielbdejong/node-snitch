@@ -1,0 +1,9 @@
+{
+  "name": "snitch",
+  "repository": "https://github.com/michielbdejong/snitch",
+  "version": "0.0.0",
+  "dependencies": {
+    "node-letsencrypt": "*"
+  },
+  "main": "index.js"
+}
