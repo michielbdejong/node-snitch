@@ -151,15 +151,21 @@ module.exports.DEFAULT_KEY = DEFAULT_KEY;
 module.exports.DEFAULT_CERT = DEFAULT_CERT;
 module.exports.Store = Store;
 
-function Store(setCertificatesFolder, setLoadInterval, setErrorCallback) {
+function Store(setCertificatesFolder, setLoadInterval, setErrorCallback, setWhitelistCallback) {
   this.certificatesFolder = setCertificatesFolder;
   if (this.certificatesFolder.substr(-1) !== '/') {
     this.certificatesFolder += '/';
   }
   this.loadTimer = setInterval(this.loadContexts.bind(this), setLoadInterval);
   this.contexts = {};
+  this.pendingCerts = {};
   this.errorCallback = setErrorCallback;
+  this.whitelist = setWhitelistCallback;
   this.loadContexts();
+  this.defaultContext = crypto.createCredentials({
+    key: DEFAULT_KEY,
+    cert: DEFAULT_CERT
+  }).context;
 }
 
 Store.prototype.getContext = function(servername) {
@@ -170,11 +176,11 @@ Store.prototype.getContext = function(servername) {
     console.log('SNI miss for ' + servername);
     if (servername.substr(-('.acme.invalid'.length)) === '.acme.invalid') {
       console.log('Ignoring');
-    } else if (pendingCerts[servername]) {
+    } else if (this.pendingCerts[servername]) {
       console.log('Registration already pending');
-    } else if (whitelist(servername)) {
+    } else if (this.whitelist(servername)) {
       console.log('Registering...');
-      pendingCerts[servername] = registerCert(servername, function(err, options) {
+      this.pendingCerts[servername] = registerCert(servername, function(err, options) {
         if (err) {
           console.log('could not obtain cert', servername, err);
         } else {
@@ -182,14 +188,14 @@ Store.prototype.getContext = function(servername) {
           saveHttpsOptionsToDisk(servername, options, function(err2) {
             console.log('saved cert to disk', servername, err2);
           });
-          contexts[servername] = crypto.createCredentials(options).context;
-          delete pendingCerts[servername];
+          this.contexts[servername] = crypto.createCredentials(options).context;
+          delete this.pendingCerts[servername];
         }
       });
     } else {
       console.log('Rejected by whitelist function');
     }
-    return defaultContext;
+    return this.defaultContext;
   }
 };
 
