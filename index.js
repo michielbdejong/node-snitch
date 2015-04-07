@@ -91,12 +91,12 @@ Store.prototype.loadContexts = function() {
   var self = this;
   fs.readdir(this.certificatesFolder, function(err, listing) {
     if (err) {
-      self.errorCallback('no certificates folder found at '+certificatesFolder);
+      self.errorCallback('no certificates folder found at '+self.certificatesFolder);
       return;
     }
     console.log(listing);
     for (var i=0; i<listing.length; i++) {
-      getHttpsOptionsFromDisk(certificatesFolder, listing[i], (function(domain) {
+      getHttpsOptionsFromDisk(self.certificatesFolder, listing[i], (function(domain) {
         return function(err, options) {
           if (err) {
             self.errorCallback(err);
@@ -153,6 +153,9 @@ module.exports.Store = Store;
 
 function Store(setCertificatesFolder, setLoadInterval, setErrorCallback) {
   this.certificatesFolder = setCertificatesFolder;
+  if (this.certificatesFolder.substr(-1) !== '/') {
+    this.certificatesFolder += '/';
+  }
   this.loadTimer = setInterval(this.loadContexts.bind(this), setLoadInterval);
   this.contexts = {};
   this.errorCallback = setErrorCallback;
