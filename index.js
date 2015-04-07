@@ -171,7 +171,7 @@ function Store(setCertificatesFolder, setLoadInterval, setErrorCallback, setWhit
 Store.prototype.getContext = function(servername) {
   if (this.contexts[servername]) {
     console.log('SNI hit for ' + servername);
-    return contexts[servername];
+    return this.contexts[servername];
   } else {
     console.log('SNI miss for ' + servername);
     if (servername.substr(-('.acme.invalid'.length)) === '.acme.invalid') {
@@ -199,13 +199,13 @@ Store.prototype.getContext = function(servername) {
   }
 };
 
-module.exports.handleChallenge =  function(req, res) {
+Store.prototype.handleChallenge =  function(req, res) {
   var wellKnownPrefix = '/.well-known/acme-challenge/';
   if (req.url.substring(0, wellKnownPrefix.length) === wellKnownPrefix) {
     var domain = req.headers.host;
     var challenge = req.url.substring(wellKnownPrefix.length);
-    if (pendingCerts[domain]) {
-      var token = pendingCerts[domain](challenge);
+    if (this.pendingCerts[domain]) {
+      var token = this.pendingCerts[domain](challenge);
       //console.log('responding', domain, challenge, token);
       res.writeHead(200);
       res.end(token);
