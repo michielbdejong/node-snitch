@@ -6,7 +6,7 @@
 var fs = require('fs'),
     mkdirp = require('mkdirp'),
     acme = require('node-letsencrypt'),
-    crypto = require('crypto');
+    tls = require('tls');
 
 var acmeServer = 'www.letsencrypt-demo.org';
 
@@ -102,7 +102,7 @@ Store.prototype.loadContexts = function() {
             self.errorCallback(err);
           } else {
             console.log('adding certificate for ' + domain);
-            self.contexts[domain] = crypto.createCredentials(options).context;
+            self.contexts[domain] = tls.createSecureContext(options);
           }
         };
       })(listing[i]));
@@ -162,10 +162,10 @@ function Store(setCertificatesFolder, setLoadInterval, setErrorCallback, setWhit
   this.errorCallback = setErrorCallback;
   this.whitelist = setWhitelistCallback;
   this.loadContexts();
-  this.defaultContext = crypto.createCredentials({
+  this.defaultContext = tls.createSecureContext({
     key: DEFAULT_KEY,
     cert: DEFAULT_CERT
-  }).context;
+  });
 }
 
 Store.prototype.getContext = function(servername) {
@@ -188,7 +188,7 @@ Store.prototype.getContext = function(servername) {
           saveHttpsOptionsToDisk(servername, options, function(err2) {
             console.log('saved cert to disk', servername, err2);
           });
-          this.contexts[servername] = crypto.createCredentials(options).context;
+          this.contexts[servername] = tls.createSecureContext(options);
           delete this.pendingCerts[servername];
         }
       });
