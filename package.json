@@ -1,9 +1,9 @@
 {
   "name": "node-snitch",
   "repository": "https://github.com/michielbdejong/snitch",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "dependencies": {
-    "node-letsencrypt": "*"
+    "node-letsencrypt": "0.0.4"
   },
   "main": "index.js"
 }
