@@ -3,7 +3,7 @@
   "repository": "https://github.com/michielbdejong/snitch",
   "version": "0.0.4",
   "dependencies": {
-    "node-letsencrypt": "0.0.4"
+    "node-letsencrypt": "0.0.6"
   },
   "main": "index.js"
 }
